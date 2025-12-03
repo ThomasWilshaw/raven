@@ -12,7 +12,14 @@ void DeleteSelectedObject() {
         return;
     }
 
+    // Flag general state change
     appState.active_tab->state_change = true;
+
+    // This function is called from DrawMenu() which is called before
+    // DrawInspector() in the main loop. THerefore we have to force update
+    // Marker and Filter redrawing here
+    appState.active_tab->marker_filter_state.reload = true;
+    appState.active_tab->effect_filter_state.reload = true;
 
     if (appState.selected_object == GetActiveRoot()) {
         CloseTab(appState.active_tab);

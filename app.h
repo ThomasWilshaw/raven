@@ -130,7 +130,7 @@ struct TabData {
     EffectFilterState effect_filter_state; // Persistant state of Effect filtering
 
     // This should be set to true whenever something happens that changes to state
-    // of the tab . Then on the next draw loop we can check this and update things
+    // of the tab. Then on the next draw loop we can check this and update things
     // as required. See the Effects Inspector for an example. If set to true
     // things are handled in AppUpdate() in app.c
     // TODO: Could use to add a "file changed" indicator to the tab headers

@@ -188,6 +188,9 @@ void AddMarkerAtPlayhead(otio::Item* item, std::string name, std::string color) 
     otio::SerializableObject::Retainer<otio::Marker> marker = new otio::Marker(name, marked_range, color);
 
     item->markers().push_back(marker);
+
+    // Force Marker inpsector to redraw
+    appState.active_tab->marker_filter_state.reload = true;
 }
 
 void AddTrack(std::string kind) {

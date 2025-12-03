@@ -209,6 +209,7 @@ void DrawJSONApplyEditButtons() {
                 SelectObject(replacement_object);
                 UpdateJSONInspector();
                 Message("Edits applied.");
+                appState.active_tab->state_change = true;
             }
         }
     }
@@ -218,6 +219,7 @@ void DrawJSONApplyEditButtons() {
     if (ImGui::Button("Revert")) {
         UpdateJSONInspector();
         Message("Edits reverted.");
+        appState.active_tab->state_change = true;
     }
 }
 

@@ -15,7 +15,7 @@
 	url = https://github.com/ocornut/imgui.git
 [submodule "libs/ImGuiColorTextEdit"]
 	path = libs/ImGuiColorTextEdit
-	url = https://github.com/jminor/ImGuiColorTextEdit.git
+	url = https://github.com/goossens/ImGuiColorTextEdit.git
 [submodule "libs/minizip-ng"]
 	path = libs/minizip-ng
 	url = https://github.com/zlib-ng/minizip-ng.git

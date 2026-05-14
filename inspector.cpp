@@ -23,67 +23,56 @@
 #include <implot.h>
 #include <TextEditor.h>
 
+#include <regex>
+
 static const char* marker_color_names[] = {
     "PINK", "RED", "ORANGE", "YELLOW",
     "GREEN", "CYAN", "BLUE", "PURPLE",
     "MAGENTA", "BLACK", "WHITE"
 };
 
-const TextEditor::LanguageDefinition& OTIOLanguageDef()
+const TextEditor::Language* OTIOLanguage()
 {
-    static bool inited = false;
-    static TextEditor::LanguageDefinition langDef;
-    if (!inited)
+    static bool initialized = false;
+    static TextEditor::Language language;
+
+    if (!initialized)
     {
-        static const char* const keywords[] = {
-            "true", "false", "null"
-        };
+        const TextEditor::Language* jsonLang = TextEditor::Language::Json();
+        language = *jsonLang;
+        language.name = "OTIO/JSON";
 
-        for (auto& k : keywords)
-            langDef.mKeywords.insert(k);
+        // TODO: Special highlighting for "OTIO_SCHEMA" strings
+        // Old jminor fork: used mTokenRegexStrings with pattern \\\"OTIO_SCHEMA\\\"
+        // New goossens fork: removed regex API, requires custom tokenizer wrapper
+        // The problem: "OTIO_SCHEMA" appears quoted in JSON. keywords/identifiers only match bare
+        // tokens. Recoloring string content requires intercepting with customTokenizer
+        // before the string state machine consumes it. Too complex for minimal benefit.
 
-        static const char* const identifiers[] = {
-            "\"OTIO_SCHEMA\""
-        };
-        for (auto& k : identifiers)
-        {
-            TextEditor::Identifier id;
-            id.mDeclaration = "OpenTimelineIO Schema";
-            langDef.mIdentifiers.insert(std::make_pair(std::string(k), id));
-        }
-
-        langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, TextEditor::PaletteIndex>("\\\"OTIO_SCHEMA\\\"", TextEditor::PaletteIndex::Identifier));
-        langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, TextEditor::PaletteIndex>("\\\"(\\\\.|[^\\\"])*\\\"", TextEditor::PaletteIndex::String));
-        langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, TextEditor::PaletteIndex>("[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?", TextEditor::PaletteIndex::Number));
-        langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, TextEditor::PaletteIndex>("[a-zA-Z_][a-zA-Z0-9_]*", TextEditor::PaletteIndex::Identifier));
-        langDef.mTokenRegexStrings.push_back(std::make_pair<std::string, TextEditor::PaletteIndex>("[\\[\\]\\{\\}\\,\\:]", TextEditor::PaletteIndex::Punctuation));
-
-        langDef.mCommentStart = "/*";
-        langDef.mCommentEnd = "*/";
-        langDef.mSingleLineComment = "//";
-
-        langDef.mCaseSensitive = true;
-        langDef.mAutoIndentation = true;
-
-        langDef.mName = "JSON";
-
-        inited = true;
+        initialized = true;
     }
-    return langDef;
+
+    return &language;
 }
 
 TextEditor jsonEditor;
-TextEditor::LanguageDefinition otioLangDef = OTIOLanguageDef();
 bool json_rendered = false;
 bool json_edited = false;
 std::string json_error_message;
 int json_error_line = -1;
 
 void UpdateJSONInspector() {
-    jsonEditor.SetReadOnly(false);
-    jsonEditor.SetLanguageDefinition(otioLangDef);
+    // Ensure palette is set (fixes static initialization order issue)
+    static bool paletteInitialized = false;
+    if (!paletteInitialized) {
+        jsonEditor.SetPalette(TextEditor::GetDarkPalette());
+        paletteInitialized = true;
+    }
+
+    jsonEditor.SetReadOnlyEnabled(false);
+    jsonEditor.SetLanguage(OTIOLanguage());
     jsonEditor.SetText(appState.selected_text);
-    jsonEditor.SetErrorMarkers({});
+    jsonEditor.ClearMarkers();
     json_rendered = false;
     json_edited = false;
     json_error_message = "";
@@ -122,10 +111,13 @@ void SetJSONErrorMessage(std::string message) {
         wrapped_message += c;
     }
 
+    jsonEditor.ClearMarkers();
     if (json_error_line >= 0) {
-        jsonEditor.SetErrorMarkers({ { json_error_line, wrapped_message } });
-    } else {
-        jsonEditor.SetErrorMarkers({});
+        jsonEditor.AddMarker(json_error_line,
+                             IM_COL32(255, 0, 0, 255),
+                             IM_COL32(255, 100, 100, 50),
+                             wrapped_message.c_str(),
+                             "");
     }
 
     json_error_message = wrapped_message;
@@ -222,17 +214,17 @@ void DrawJSONApplyEditButtons() {
 }
 
 void DrawJSONInspector() {
-    // Check if the text was edited this frame.
-    // Note that IsTextChanged() is true only until Render is called.
-    // We have to also check if Render was called since the text
-    // was last set via SetText() inside UpdateJSONInspector().
-    if (json_rendered && jsonEditor.IsTextChanged()) {
+    // Check if the text was edited.
+    // We use CanUndo() to detect if there are any edits since SetText() was called,
+    // as SetText() clears the undo stack. We also check json_rendered to ensure
+    // Render() was called at least once since UpdateJSONInspector().
+    if (json_rendered && jsonEditor.CanUndo()) {
         json_edited = true;
     }
 
     auto available_size = ImGui::GetContentRegionAvail();
     available_size.y -= ImGui::GetFrameHeightWithSpacing();
-    jsonEditor.Render("JSON",false, available_size);
+    jsonEditor.Render("JSON", available_size);
     json_rendered = true;
 
     if (json_edited) {

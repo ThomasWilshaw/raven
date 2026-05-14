@@ -35,7 +35,7 @@ endif()
 
 add_library(IMGUI STATIC)
 
-set_property(TARGET IMGUI PROPERTY CXX_STANDARD 14)
+set_property(TARGET IMGUI PROPERTY CXX_STANDARD 17)
 
 set(IMGUI_DIR imgui)
 set(IMPLOT_DIR implot)

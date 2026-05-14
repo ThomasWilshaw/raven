@@ -571,7 +571,7 @@ void DrawLinearTimeWarp(otio::LinearTimeWarp* timewarp, otio::Item* item) {
     const ImColor knot_color = appTheme.colors[AppThemeCol_ItemSelected];
 
     ImPlotFlags plot_flags = ImPlotFlags_NoTitle | ImPlotFlags_NoLegend | ImPlotFlags_NoInputs
-        | ImPlotFlags_NoMenus | ImPlotFlags_NoBoxSelect | ImPlotFlags_NoChild
+        | ImPlotFlags_NoMenus | ImPlotFlags_NoBoxSelect
         | ImPlotFlags_NoFrame | ImPlotFlags_Equal | ImPlotFlags_None;
     ImPlotDragToolFlags drag_flags = ImPlotDragToolFlags_NoInputs
         | ImPlotDragToolFlags_None;
@@ -585,35 +585,34 @@ void DrawLinearTimeWarp(otio::LinearTimeWarp* timewarp, otio::Item* item) {
             fmax(start->y, end->y),
             ImGuiCond_Always);
 
-        ImPlot::SetNextLineStyle(line_color, line_width);
+        ImPlotSpec line_spec;
+        line_spec.LineColor = line_color;
+        line_spec.LineWeight = line_width;
+        line_spec.Stride = sizeof(ImPlotPoint);
         ImPlot::PlotLine(
             "##Line",
             &start->x,
             &start->y,
             2,
-            0,
-            0,
-            sizeof(ImPlotPoint));
+            line_spec);
 
         // start handle
-        ImPlot::SetNextLineStyle(knot_color);
         if (ImPlot::DragPoint(
                 0,
                 &start->x,
                 &start->y,
-                ImVec4(0, 0.9f, 0, 1),
+                knot_color,
                 knot_radius,
                 drag_flags)) {
             ;
         }
 
         // end handle
-        ImPlot::SetNextLineStyle(knot_color);
         if (ImPlot::DragPoint(
                 3,
                 &end->x,
                 &end->y,
-                ImVec4(0, 0.9f, 0, 1),
+                knot_color,
                 knot_radius,
                 drag_flags)) {
             ;
@@ -918,7 +917,7 @@ void DrawMarkersInspector() {
         }
     }
 
-    auto selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
+    auto selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap;
 
     if (ImGui::BeginTable("Markers",
                           5,
@@ -1032,7 +1031,7 @@ void DrawEffectsInspector() {
         }
     }
 
-    auto selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
+    auto selectable_flags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap;
 
     if (ImGui::BeginTable("Effects",
                           4,
@@ -1181,7 +1180,7 @@ void DrawTreeInspector() {
         // instead of only the 1st column with the tree node.
         ImGui::TableNextColumn();
         bool just_clicked = ImGui::IsItemClicked();
-        bool just_selected = ImGui::Selectable(composable->schema_name().c_str(), is_selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap);
+        bool just_selected = ImGui::Selectable(composable->schema_name().c_str(), is_selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap);
         if (just_clicked || just_selected) {
             SelectObject(composable);
             appState.active_tab->playhead = global_time;

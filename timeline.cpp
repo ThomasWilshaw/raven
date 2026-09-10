@@ -125,6 +125,7 @@ void DrawItem(
     ImGui::PushID(item);
     ImGui::BeginGroup();
 
+    ImGui::SetNextItemAllowOverlap();
     ImGui::InvisibleButton("##Item", size);
 
     // Don't skip invisible item if it is the item we have just selected
@@ -157,8 +158,6 @@ void DrawItem(
         ImGui::SetCursorPos(old_pos);
         return;
     }
-
-    ImGui::SetItemAllowOverlap();
 
     // Dragging...
     // if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
@@ -339,7 +338,7 @@ void DrawTransition(
         ImGui::SetCursorPos(old_pos);
         return;
     }
-    // ImGui::SetItemAllowOverlap();
+    // ImGui::SetNextItemAllowOverlap();
 
     if (ImGui::IsItemHovered()) {
         fill_color = hover_fill_color;
@@ -454,7 +453,7 @@ void DrawEffects(
         ImGui::SetCursorPos(old_pos);
         return;
     }
-    // ImGui::SetItemAllowOverlap();
+    // ImGui::SetNextItemAllowOverlap();
 
     if (ImGui::IsItemHovered()) {
         fill_color = hover_fill_color;
@@ -570,7 +569,7 @@ void DrawMarkers(
             continue;
             ;
         }
-        // ImGui::SetItemAllowOverlap();
+        // ImGui::SetNextItemAllowOverlap();
 
         if (ImGui::IsItemHovered()) {
             fill_color = hover_fill_color;
@@ -813,10 +812,10 @@ void DrawTimecodeRuler(
     ImGui::PushID(ptr_id);
     ImGui::BeginGroup();
 
+    ImGui::SetNextItemAllowOverlap();
     ImGui::Dummy(size);
     const ImVec2 p0 = ImGui::GetItemRectMin();
     const ImVec2 p1 = ImGui::GetItemRectMax();
-    ImGui::SetItemAllowOverlap();
     if (!ImGui::IsRectVisible(p0, p1)) {
         ImGui::EndGroup();
         ImGui::PopID();
@@ -945,13 +944,13 @@ bool DrawTimecodeTrack(
     ImGui::PushID("##DrawTimecodeTrack");
     ImGui::BeginGroup();
 
+    ImGui::SetNextItemAllowOverlap();
     if (interactive) {
         ImGui::InvisibleButton("##empty", size);
     } else {
         ImGui::Dummy(size);
     }
     const ImVec2 p0 = ImGui::GetItemRectMin();
-    ImGui::SetItemAllowOverlap();
 
     if (interactive && ImGui::IsItemActive()) // &&
     // ImGui::IsMouseDragging(ImGuiMouseButton_Left))
@@ -1020,12 +1019,12 @@ float DrawPlayhead(
 
     ImGui::PushID("##Playhead");
     ImGui::BeginGroup();
+    ImGui::SetNextItemAllowOverlap();
     ImGui::InvisibleButton("##Playhead2", size);
 
     // Compute where we are rendering in screen space for draw list functions.
     ImVec2 p0 = ImGui::GetItemRectMin();
     ImVec2 p1 = ImGui::GetItemRectMax();
-    ImGui::SetItemAllowOverlap();
 
     // compute the playhead x position in the local (aka window) coordinate system
     // so that later we can use SetScrollFromPosX() to scroll the timeline.

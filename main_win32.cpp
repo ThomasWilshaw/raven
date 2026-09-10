@@ -104,6 +104,7 @@ int main(int argc, char** argv)
     ImGui::CreateContext();
     ImPlot::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigDebugHighlightIdConflicts = false;  // Disable ID conflict warnings introduced in ImGui v1.91.2 (pre-existing issues from before update)
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking

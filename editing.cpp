@@ -12,6 +12,15 @@ void DeleteSelectedObject() {
         return;
     }
 
+    // Flag general state change
+    appState.active_tab->state_change = true;
+
+    // This function is called from DrawMenu() which is called before
+    // DrawInspector() in the main loop. THerefore we have to force update
+    // Marker and Filter redrawing here
+    appState.active_tab->marker_filter_state.reload = true;
+    appState.active_tab->effect_filter_state.reload = true;
+
     if (appState.selected_object == GetActiveRoot()) {
         CloseTab(appState.active_tab);
         return;
@@ -179,6 +188,9 @@ void AddMarkerAtPlayhead(otio::Item* item, std::string name, std::string color) 
     otio::SerializableObject::Retainer<otio::Marker> marker = new otio::Marker(name, marked_range, color);
 
     item->markers().push_back(marker);
+
+    // Force Marker inpsector to redraw
+    appState.active_tab->marker_filter_state.reload = true;
 }
 
 void AddTrack(std::string kind) {

@@ -773,13 +773,10 @@ void DrawInspector() {
 
         // Array of names and corresponding MediaReference pointers
         std::vector<const char*> reference_names;
-        otio::MediaReference** reference_objects = new otio::MediaReference*[media_references.size()];
-
-        size_t i = 0;
+        std::vector<otio::MediaReference*> reference_objects;
         for (const auto& media_reference : media_references) {
             reference_names.push_back(media_reference.first.c_str());
-            reference_objects[i] = media_reference.second;
-            i++;
+            reference_objects.push_back(media_reference.second);
         }
         int num_references = static_cast<int>(media_references.size());
 
@@ -796,7 +793,7 @@ void DrawInspector() {
         }
 
         // Set the active media ref key based on user selection
-        if (ImGui::Combo("##", &appState.selected_reference_index, reference_names.data(), num_references)) {
+        if (ImGui::Combo("##media_reference", &appState.selected_reference_index, reference_names.data(), num_references)) {
             if (appState.selected_reference_index >= 0 && appState.selected_reference_index < num_references) {
                 clip->set_active_media_reference_key(reference_names[appState.selected_reference_index]);
             }
